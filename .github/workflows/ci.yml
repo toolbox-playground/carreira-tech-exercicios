@@ -1,0 +1,139 @@
+name: CI — Carreira Tech Labs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 1 — BUILD
+  # Configura o ambiente Python e instala as dependências
+  # ────────────────────────────────────────────────────────────────────────────
+  build:
+    name: 🔧 Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: modulo2-construindo-aplicacoes/aula2e-testes-software/requirements.txt
+
+      - name: Instalar dependências
+        working-directory: modulo2-construindo-aplicacoes/aula2e-testes-software
+        run: pip install -r requirements.txt
+
+      - name: Salvar ambiente instalado para os próximos jobs
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-env
+          path: ~/.cache/pip
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 2 — TEST
+  # Roda os testes unitários e mede a cobertura de código
+  # ────────────────────────────────────────────────────────────────────────────
+  test:
+    name: 🧪 Test
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        working-directory: modulo2-construindo-aplicacoes/aula2e-testes-software
+        run: pip install -r requirements.txt
+
+      - name: Rodar testes com cobertura
+        working-directory: modulo2-construindo-aplicacoes/aula2e-testes-software
+        run: pytest --cov=calculadora --cov=main --cov-report=term-missing --cov-fail-under=70 -v
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 3 — SECURITY
+  # Verifica vulnerabilidades no código e nas dependências
+  # Sem chaves ou configurações externas necessárias
+  # ────────────────────────────────────────────────────────────────────────────
+  security:
+    name: 🔐 Security
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar ferramentas de segurança
+        run: pip install bandit pip-audit
+
+      - name: Instalar dependências do lab
+        working-directory: modulo2-construindo-aplicacoes/aula2e-testes-software
+        run: pip install -r requirements.txt
+
+      - name: "bandit — análise estática de segurança no código Python"
+        working-directory: modulo2-construindo-aplicacoes/aula2e-testes-software
+        run: bandit -r calculadora.py main.py -ll
+
+      - name: "pip-audit — verifica vulnerabilidades nas dependências"
+        working-directory: modulo2-construindo-aplicacoes/aula2e-testes-software
+        run: pip-audit -r requirements.txt
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # JOB 4 — DEPLOY (simulado)
+  # Em produção real: aqui iria o docker build + push + deploy na nuvem
+  # ────────────────────────────────────────────────────────────────────────────
+  deploy:
+    name: 🚀 Deploy
+    runs-on: ubuntu-latest
+    needs: security
+
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Simular build da imagem Docker
+        run: |
+          echo ">>> docker build -t carreira-tech-api:${{ github.sha }} ."
+          echo "✅ Imagem construída com sucesso"
+
+      - name: Simular push para registry
+        run: |
+          echo ">>> docker push registry.tbxtech.com.br/carreira-tech-api:${{ github.sha }}"
+          echo "✅ Imagem enviada para o registry"
+
+      - name: Simular deploy na nuvem
+        run: |
+          echo ">>> Fazendo deploy na versão ${{ github.sha }}"
+          echo ">>> Verificando health check da aplicação..."
+          echo "✅ Deploy concluído — aplicação saudável em produção"
+
+      - name: Resumo do pipeline
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  ✅ Build    — dependências instaladas"
+          echo "  ✅ Test     — todos os testes passaram"
+          echo "  ✅ Security — sem vulnerabilidades encontradas"
+          echo "  ✅ Deploy   — aplicação no ar"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Commit: ${{ github.sha }}"
+          echo "  Branch: ${{ github.ref_name }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
