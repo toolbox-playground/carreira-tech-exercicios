@@ -1,0 +1,17 @@
+# Secrets — NUNCA vão ao GitHub
+.env
+.env.local
+.env.example
+*.key
+*.pem
+credentials.json
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Banco local
+*.sqlite
+*.db
