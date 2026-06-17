@@ -16,8 +16,8 @@ print("\n📋 Buscando lista de posts...")
 response = requests.get(f"{BASE_URL}/posts")
 print(f"Status: {response.status_code}")           # 200
 
-posts = response.json()                             # lista de dicionários Python
-print(f"Total de posts: {len(posts)}")              # 100
+posts = response.json()
+print(f"Total de posts: {len(posts)}")
 print(f"Primeiro post: {posts[0]['title']}")
 
 # ── GET com ID: buscar item específico ────────────────────────────────────────
@@ -41,10 +41,9 @@ print(f"Post criado: {resp.json()}")
 print("\n⚠️  Testando endpoint inexistente...")
 try:
     r = requests.get(f"{BASE_URL}/posts/9999")
-    r.raise_for_status()                            # lança exceção se status >= 400
-    print(r.json())
+    r.raise_for_status()
 except requests.HTTPError as e:
-    print(f"Erro HTTP: {e}")
+    print(f"Erro HTTP capturado: {e}")
 except requests.ConnectionError:
     print("Sem conexão com a internet")
 

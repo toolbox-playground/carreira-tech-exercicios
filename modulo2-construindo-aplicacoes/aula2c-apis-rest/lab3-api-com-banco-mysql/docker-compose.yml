@@ -1,0 +1,16 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: aula2c_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: senha123
+      MYSQL_DATABASE: loja
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: senha123
+    ports:
+      - "3308:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psenha123"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
